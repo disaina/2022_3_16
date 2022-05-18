@@ -22,14 +22,16 @@ public:
     
     // The compute pipeline generated from the compute kernel in the .metal shader file.
     MTL::ComputePipelineState* mComputeFunctionPSO;
+	MTL::ComputePipelineState* mAddFunPSO;
     
     // The command queue used to pass commands to the device.
     MTL::CommandQueue* mCommandQueue;
     
-    // Buffers to hold data.
+    // Buffers to hold data
     MTL::Buffer *mBufferA;
     MTL::Buffer *mBufferB;
     MTL::Buffer *mBufferResult;
+	MTL::Buffer *mBufferResult1;
     
     void initWithDevice(MTL::Device*);
     void prepareData();

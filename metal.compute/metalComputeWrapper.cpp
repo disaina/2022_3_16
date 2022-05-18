@@ -7,6 +7,7 @@
 
 #include "metalComputeWrapper.hpp"
 #include <iostream>
+using namespace std;
 
 void metalComputeWrapper::initWithDevice(MTL::Device* device) {
     mDevice = device;
@@ -21,14 +22,22 @@ void metalComputeWrapper::initWithDevice(MTL::Device* device) {
     
     auto functionName = NS::String::string("work_on_arrays", NS::ASCIIStringEncoding);
     auto computeFunction = defaultLibrary->newFunction(functionName);
-    
-    if(!computeFunction){
+    MTL::Function* addFun=defaultLibrary->newFunction(NS::String::string("add_on_arrays”),UTF8StringEncoding);
+    if(!addFun){
+        std::cerr << "Failed to find the addFun function.\n";
+    }
+	if(!computeFunction){
         std::cerr << "Failed to find the compute function.\n";
     }
     
     mComputeFunctionPSO = mDevice->newComputePipelineState(computeFunction, &error);
+	mAddFunPSO=mDevice->newComputePipelineState(addFun,&error);
     
-    if (!computeFunction) {
+    if (!mComputeFunctionPSO) {
+        std::cerr << "Failed to create the pipeline state object.\n";
+        exit(-1);
+    }
+	if (!mAddFunPSO) {
         std::cerr << "Failed to create the pipeline state object.\n";
         exit(-1);
     }
@@ -46,7 +55,8 @@ void metalComputeWrapper::prepareData() {
     mBufferA = mDevice->newBuffer(BUFFER_SIZE, MTL::ResourceStorageModeShared);
     mBufferB = mDevice->newBuffer(BUFFER_SIZE, MTL::ResourceStorageModeShared);
     mBufferResult = mDevice->newBuffer(BUFFER_SIZE, MTL::ResourceStorageModeShared);
-    
+    mBufferResult1 = mDevice->newBuffer(BUFFER_SIZE, MTL::ResourceStorageModeShared);
+	
     generateRandomFloatData(mBufferA);
     generateRandomFloatData(mBufferB);
 }
@@ -101,19 +111,24 @@ void metalComputeWrapper::encodeComputeCommand(MTL::ComputeCommandEncoder * comp
 
     // Encode the compute command.
     computeEncoder->dispatchThreads(gridSize, threadgroupSize);
+	
+	computeEncoder->setComputePipelineState(mAddFunPSO);
+    computeEncoder->setBuffer(mBufferA, 0, 0);
+    computeEncoder->setBuffer(mBufferB, 0, 1);
+    computeEncoder->setBuffer(mBufferResult1, 0, 2);
+	// Encode the compute command.
+	computeEncoder->dispatchThreads(gridSize, threadgroupSize);
 }
 
 void metalComputeWrapper::verifyResults(){
     float* a = (float*) mBufferA->contents();
     float* b = (float*) mBufferB->contents();
     float* result = (float*) mBufferResult->contents();
+	float* result1 = (float*) mBufferResult1->contents();
     
-    for(unsigned long int index = 0; index < ARRAY_LENGTH; index++)
-        if(abs(result[index] - (a[index] * b[index])) > DELTA) {
-            std::cout << "Compute ERROR: index= " << index << " result= " << result[index] <<  " vs " << a[index] * b[index] << " = a * b\n";
-            
-            assert(abs(result[index] - (a[index] * b[index])) > DELTA);
-        }
-    
+    for(unsigned long int index = 0; index < ARRAY_LENGTH; index++){
+        cout<<index<<":"<<a[index]<<"+"<<b[index]<<"="<<result1[index]<<endl;
+		cout<<"  :"<<a[index]<<"*"<<b[index]<<"="<<result[index]<<endl;
+	}
     std::cout << "Compute results as expected.\n";
 }
