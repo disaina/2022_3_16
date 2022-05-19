@@ -16,11 +16,12 @@ kernel void work_on_arrays(device const float* inA,
 {
     result[index] = inA[index] * inB[index];
 }
-kernel void add_on_arrays( device const float* inA,
-                           device const float* inB,
-                           device float* result,
-			   constant float& i,
-                           uint index [[thread_position_in_grid]])
+kernel void add_on_arrays(device const float* inA,
+                          device const float* inB,
+                          device float* result,
+						  constant float& f,
+						  uint& i; 
+                          uint index [[thread_position_in_grid]])
 {
-    result[index] = inA[index] + inB[index]+i;
+    result[index] = inA[index] + inB[index]+i-f;
 }

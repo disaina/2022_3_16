@@ -32,7 +32,8 @@ public:
     MTL::Buffer *mBufferB;
     MTL::Buffer *mBufferResult;
     MTL::Buffer *mBufferResult1;
-    float const1=1.0;
+    float f=1.0;
+	uint i=10;
     
     void initWithDevice(MTL::Device*);
     void prepareData();

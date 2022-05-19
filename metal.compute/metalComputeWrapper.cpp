@@ -116,7 +116,8 @@ void metalComputeWrapper::encodeComputeCommand(MTL::ComputeCommandEncoder * comp
     computeEncoder->setBuffer(mBufferA, 0, 0);
     computeEncoder->setBuffer(mBufferB, 0, 1);
     computeEncoder->setBuffer(mBufferResult1, 0, 2);
-	computeEncoder->setBytes(&const1, sizeof(float), 3);
+	computeEncoder->setBytes(&f, sizeof(float), 3);
+	computeEncoder->setBytes(&i, sizeof(uint), 4);
 	// Encode the compute command.
 	computeEncoder->dispatchThreads(gridSize, threadgroupSize);
 }
