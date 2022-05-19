@@ -19,7 +19,8 @@ kernel void work_on_arrays(device const float* inA,
 kernel void add_on_arrays(device const float* inA,
                            device const float* inB,
                            device float* result,
+						   constant float i,
                            uint index [[thread_position_in_grid]])
 {
-    result[index] = inA[index] + inB[index];
+    result[index] = inA[index] + inB[index]+i;
 }
